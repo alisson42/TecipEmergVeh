@@ -1,0 +1,545 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <title>5G TIM-SSSA project example</title>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.16.0/umd/popper.min.js"></script>
+  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+  
+  <!-- leaflet -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.3.4/dist/leaflet.css" 
+  integrity="sha512-puBpdR0798OZvTTbP4A8Ix/l+A4dHDD0DGqYW6RQ+9jxkRFclaxxQb/SJAWZfWAkuyeQUytO7+7N4QKrDh+drA=="
+  crossorigin=""/>
+
+  <script src="https://unpkg.com/leaflet@1.3.4/dist/leaflet.js"
+  integrity="sha512-nMMmRyTVoLYqjP9hrbed9S+FzjZHW5gY1TWCHA5ckwXZBadntCNs8kEqAWdrb9O7rxbCaA4lKTIWjDXZxflOcA=="
+  crossorigin=""></script>
+
+  <script src="https://code.jquery.com/jquery-3.3.1.min.js"
+  integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8="
+  crossorigin="anonymous"></script>
+
+  <!--style>html, body {width: 100%;height: 100%;margin: 0;padding: 0;}</style-->
+  <style>#map {position:absolute;top:0;bottom:0;right:0;left:0;}</style>
+  <style>#map {
+        position: relative;
+        width: 100.0%;
+        height: 100.0%;
+        left: 0.0%;
+        top: 0.0%;
+        }
+        .popupCustom .leaflet-popup-tip,
+        .popupCustom .leaflet-popup-content-wrapper {
+                background:#FA1919;
+                color:#FFFFFF;
+                font-size:14px;
+                line-height:15px;
+                text-align: center;
+                border-radius: 5px;
+                border-color: yellow;
+                padding: 0px;
+                margin: 0px;
+        }
+  </style>
+</head>
+
+<body>
+
+  <div class="container-fluid">
+    <div class="row">
+      <div class="col-md-12 border">
+        <p class="text-center">TIM-SSSA - VRU recognition</p>
+      </div>
+    </div>
+    <div class="row">
+      <div class="col-sm-2 border">
+        <div class="row-sm-4">
+          <h3>Car 1</h3>
+          <p>Front - 100 m</p>
+        </div>
+        <div class="row-sm-4">
+          <h3> Car 2</h3>
+          <p>Back - 150 m</p>
+        </div>
+        <div class="row-sm-4">
+          <h3>Car 3</h3>
+          <p>Left - 200 m</p>
+        </div>
+        <div class="row-sm-4">
+          <h3>Car 4</h3>
+          <p>Right - 250 m</p>
+        </div>
+      </div>
+      <div class="col">
+        <p class="text-center"> OpenStreetMap view</p>
+        <div class="popupCustom" id="map" ></div>
+      </div>
+    </div>
+    <div class="row">
+      <div class="col-md-12 border">
+        <p class="text-right">Current Car: 1 - VRU on the left. Next intersection at 100m. VRU distance: 300m</p>
+      </div>
+    </div>
+  </div>
+</body>
+<script>    
+var bounds = null;
+var markers_objs = Array();
+
+lat_pedestrian=43.71822;
+lng_pedestrian=10.42504;
+
+var map = L.map(
+        'map', {
+        center: [43.71830, 10.42472 ],
+        zoom: 20,
+        maxBounds: bounds,
+        layers: [],
+        worldCopyJump: false,
+        crs: L.CRS.EPSG3857,
+        zoomControl: true,
+        });
+
+var tile_layer = L.tileLayer(
+        'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
+        {
+        "attribution": null,
+        "detectRetina": false,
+        "maxNativeZoom": 18,
+        "maxZoom": 16,
+        "minZoom": 0,
+        "noWrap": false,
+        "opacity": 1,
+        "subdomains": "abc",
+        "tms": false
+}).addTo(map);
+
+var basestationIcon = L.icon({
+        iconUrl: 'icons/basestation.png',
+        iconSize:     [50, 50], // size of the icon
+        popupAnchor:  [-3, -76] // point from which the popup should open relative to the iconAnchor
+});
+L.marker([43.71830, 10.42472], {icon: basestationIcon}).addTo(map);
+
+var pedestrianIcon = L.icon({
+        iconUrl: 'icons/pedestrian.png',
+        iconSize:     [20, 40], // size of the icon
+        popupAnchor:  [-3, -76] // point from which the popup should open relative to the iconAnchor
+});
+//test
+L.marker([43.720552, 10.421822], {icon: pedestrianIcon}).addTo(map);
+//--
+
+var carIcon = L.Icon.extend({
+    options: {
+                iconSize:     [40, 40], // size of the icon
+                popupAnchor:  [-3, -76] // point from which the popup should open relative to the iconAnchor
+    }
+});
+var green_N   = new carIcon({ iconUrl: 'icons/green_N.png' });
+var green_N_E = new carIcon({ iconUrl: 'icons/green_N_E.png' });
+var green_E   = new carIcon({ iconUrl: 'icons/green_E.png' });
+var green_S_E = new carIcon({ iconUrl: 'icons/green_S_E.png'});
+var green_S   = new carIcon({ iconUrl: 'icons/green_S.png' });
+var green_S_O = new carIcon({ iconUrl: 'icons/green_S_O.png' });
+var green_O   = new carIcon({ iconUrl: 'icons/green_O.png' });
+var green_N_O = new carIcon({ iconUrl: 'icons/green_N_O.png' });
+
+var red_N   = new carIcon({ iconUrl: 'icons/red_N.png' });
+var red_N_E = new carIcon({ iconUrl: 'icons/red_N_E.png' });
+var red_E   = new carIcon({ iconUrl: 'icons/red_E.png' });
+var red_S_E = new carIcon({ iconUrl: 'icons/red_S_E.png'});
+var red_S   = new carIcon({ iconUrl: 'icons/red_S.png' });
+var red_S_O = new carIcon({ iconUrl: 'icons/red_S_O.png' });
+var red_O   = new carIcon({ iconUrl: 'icons/red_O.png' });
+var red_N_O = new carIcon({ iconUrl: 'icons/green_N_O.png' });
+
+
+function setObjCardinality(id, cardinality, style) {
+        switch (cardinality) {
+                case 'NORTH':
+                console.log("distance: " + style);
+                if (style == 0) markers_objs[id].setIcon(green_N)
+                else markers_objs[id].setIcon(red_N);
+                break;
+
+                case 'NORTH_EAST':
+                if (style == 0) markers_objs[id].setIcon(green_N_E)
+                else markers_objs[id].setIcon(red_N_E);
+                break;
+
+                case 'EAST':
+                if (style == 0) markers_objs[id].setIcon(green_E)
+                else markers_objs[id].setIcon(red_E);
+                break;
+
+                case 'SOUTH_EAST':
+                if (style == 0) markers_objs[id].setIcon(green_S_E)
+                else markers_objs[id].setIcon(red_S_E);
+                break;
+
+                case 'SOUTH':
+                if (style == 0) markers_objs[id].setIcon(green_S)
+                else markers_objs[id].setIcon(red_S);
+                break;
+
+                case 'SOUTH_WEST':
+                if (style == 0) markers_objs[id].setIcon(green_S_O) 
+                else markers_objs[id].setIcon(red_S_O);
+                break;
+
+                case 'WEST':
+                if (style == 0) markers_objs[id].setIcon(green_O)
+                else markers_objs[id].setIcon(red_O);
+                break;
+
+                case 'NORTH_WEST':
+                if (style == 0) markers_objs[id].setIcon(green_N_O)
+                else markers_objs[id].setIcon(red_N_O);
+                break;
+        }
+}
+
+function updateMarker(data) {
+    values = data.toString().split(";");
+    id = parseInt(values[0]);
+    lat = parseFloat(values[1]);
+    lng = parseFloat(values[2]);
+    cardinality = values[3];
+    distance = parseInt(values[4]);
+    //Done
+    
+    if (markers_objs[id]) {
+        markers_objs[id].setLatLng([lat, lng]);
+        
+        if (id == 0) { // Pedestrian
+            console.log("Pedestrian: "+ lat + "," + lng);
+            lat_pedestrian=lat;
+            lng_pedestrian=lng;
+            markers_objs[id].setIcon(pedestrianIcon);
+        } else { // Vehicles
+            console.log('Vehicle['+ id +']: ' + lat + ',' + lng + ',' + cardinality + ' at ' + distance + 'm');
+            if (distance > 25) {
+                setObjCardinality(id,  cardinality, 0);
+            } else { 
+                setObjCardinality(id, cardinality, 1);
+                var popup = L.popup({
+                closeButton: false,
+                autoclose: false,
+                maxWidth: 100,
+                maxHeight: 40,
+                offset: [0,-20]
+                })
+                .setLatLng([lat_pedestrian, lng_pedestrian]) 
+                .setContent("<b>WARNING</br>" + distance + 'm</b>')
+                .openOn(map)
+
+                setTimeout(function() {
+                    map.closePopup();
+                }, 2000)
+            }
+        }
+    } else { // Not existing objects
+        var marker_obj = L.marker([lat, lng], {icon: ((id == 0) ? pedestrianIcon : green_N)});
+        markers_objs[id] = marker_obj;
+        if (id == 0) {
+            lat_pedestrian=lat;
+            lng_pedestrian=lng;
+            console.log('New Pedestrian: id='+ id + ' at ' + lat + "," + lng);
+        } else {console.log("here");
+            setObjCardinality(id,  cardinality, 0);
+            console.log('New Vehicle: id=' + id + ' at ' + lat + "," + lng + ',' + cardinality + ' at ' + distance);
+        }
+        markers_objs[id].addTo(map);
+    }
+}
+/*
+function wsConnect() {
+    //var ws = new WebSocket('ws://10.30.3.2:4999');
+    var ws = new WebSocket('ws://10.9.9.7:4999');
+
+    ws.onmessage = function (message) {
+        //console.log(message);
+        updateMarker(message.data);
+    };
+
+    ws.onclose = function(e) {
+        console.log("WebSocket error (retry in 1 second...): " + e.reason);
+        setTimeout(function() {
+            wsConnect();
+        }, 1000);
+    };
+
+    ws.onerror = function(err) {
+        console.log("Websocket error: " + err);
+        ws.close();
+    };
+}
+*/
+var msg;
+function track(){
+    let vec1 = [{
+        "lat": 43.72050520965241,
+        "lon": 10.4220449924469
+    },{
+        "lat": 43.72041991622171,
+        "lon": 10.422211289405823
+    },{
+        "lat": 43.720326868704255,
+        "lon": 10.422366857528687
+    },{
+        "lat": 43.720233821042335,
+        "lon": 10.422554612159729
+    },{
+        "lat": 43.72014077323589,
+        "lon": 10.422704815864563
+    },{
+        "lat": 43.72004772528497,
+        "lon": 10.422887206077576
+    },{
+        "lat": 43.719954677189506,
+        "lon": 10.423069596290588
+    },{
+        "lat": 43.71986162894956,
+        "lon": 10.423235893249512
+    },{
+        "lat": 43.71977245758403,
+        "lon": 10.423396825790405
+    },{
+        "lat": 43.719679409061065,
+        "lon": 10.423557758331299
+    },{
+        "lat": 43.71959411445478,
+        "lon": 10.423729419708252
+    },{
+        "lat": 43.71949718861842,
+        "lon": 10.423890352249146
+    },{
+        "lat": 43.719404139667965,
+        "lon": 10.424067378044128
+    },{
+        "lat": 43.719314967621536,
+        "lon": 10.424228310585022
+    },{
+        "lat": 43.71922579544242,
+        "lon": 10.424394607543945
+    },{
+        "lat": 43.71913274607051,
+        "lon": 10.424576997756958
+    },{
+        "lat": 43.71904357362017,
+        "lon": 10.42475938796997
+    },{
+        "lat": 43.718962155180044,
+        "lon": 10.424947142601013
+    },{
+        "lat": 43.7188691053987,
+        "lon": 10.425124168395996
+    },{
+        "lat": 43.71879156380388,
+        "lon": 10.425306558609009
+    },{
+        "lat": 43.71869851375764,
+        "lon": 10.425494313240051
+    },{
+        "lat": 43.71862097194203,
+        "lon": 10.425682067871094
+    },{
+        "lat": 43.71854730712427,
+        "lon": 10.425859093666077
+    },{
+        "lat": 43.71847364221594,
+        "lon": 10.42603611946106
+    },{
+        "lat": 43.71838446878468,
+        "lon": 10.426223874092102
+    },{
+        "lat": 43.71832243501508,
+        "lon": 10.426406264305115
+    },{
+        "lat": 43.718252646947555,
+        "lon": 10.426594018936157
+    },{
+        "lat": 43.71817510455492,
+        "lon": 10.42679250240326
+    },{
+        "lat": 43.7181053163158,
+        "lon": 10.426958799362183
+    },{
+        "lat": 43.71803940512639,
+        "lon": 10.427157282829285
+    },{
+        "lat": 43.7179734938645,
+        "lon": 10.427328944206238
+    },{
+        "lat": 43.71790370539055,
+        "lon": 10.42752742767334
+    }
+];
+
+    let vec2 = [
+  {
+    "lat": 43.72263750595699,
+    "lon": 10.430638790130615
+  },
+  {
+    "lat": 43.722350619599894,
+    "lon": 10.430370569229126
+  },
+  {
+    "lat": 43.72205597812749,
+    "lon": 10.430134534835815
+  },
+  {
+    "lat": 43.72176908898566,
+    "lon": 10.429866313934326
+  },
+  {
+    "lat": 43.721497706100614,
+    "lon": 10.429641008377075
+  },
+  {
+    "lat": 43.72121081428546,
+    "lon": 10.429426431655884
+  },
+  {
+    "lat": 43.72090841331741,
+    "lon": 10.429201126098633
+  },
+  {
+    "lat": 43.72061376475222,
+    "lon": 10.42901873588562
+  },
+  {
+    "lat": 43.72028809886268,
+    "lon": 10.428922176361084
+  },
+  {
+    "lat": 43.719970185215466,
+    "lon": 10.428857803344727
+  },
+  {
+    "lat": 43.71965226988134,
+    "lon": 10.428804159164429
+  },
+  {
+    "lat": 43.71933435286032,
+    "lon": 10.428729057312012
+  },
+  {
+    "lat": 43.71900868001651,
+    "lon": 10.428653955459595
+  },
+  {
+    "lat": 43.71868300540255,
+    "lon": 10.428600311279297
+  },
+  {
+    "lat": 43.71837283745776,
+    "lon": 10.428557395935059
+  },
+  {
+    "lat": 43.71805491364807,
+    "lon": 10.428482294082642
+  },
+  {
+    "lat": 43.71792309108591,
+    "lon": 10.428203344345093
+  },
+  {
+    "lat": 43.71772923385001,
+    "lon": 10.427978038787842
+  },
+  {
+    "lat": 43.717543130313494,
+    "lon": 10.428181886672974
+  },
+  {
+    "lat": 43.717543130313494,
+    "lon": 10.428428649902344
+  },
+  {
+    "lat": 43.7175121130012,
+    "lon": 10.428686141967773
+  },
+  {
+    "lat": 43.717442323989864,
+    "lon": 10.42902946472168
+  },
+  {
+    "lat": 43.71732600879033,
+    "lon": 10.429458618164062
+  },
+  {
+    "lat": 43.717217447733724,
+    "lon": 10.429812669754028
+  },
+  {
+    "lat": 43.71712439524293,
+    "lon": 10.430134534835815
+  },
+  {
+    "lat": 43.71703134260764,
+    "lon": 10.430434942245483
+  },
+  {
+    "lat": 43.71693828982785,
+    "lon": 10.430703163146973
+  },
+  {
+    "lat": 43.716829728068795,
+    "lon": 10.43103575706482
+  },
+  {
+    "lat": 43.71672116611306,
+    "lon": 10.431389808654785
+  },
+  {
+    "lat": 43.7166281128516,
+    "lon": 10.431711673736572
+  },
+  {
+    "lat": 43.716558322810656,
+    "lon": 10.43201208114624
+  }
+];
+
+
+
+    var i = 0;
+    console.log(Object.keys(vec1).length);
+
+    function updateMap() {         
+      setTimeout(function() {  
+        msg1 = "1;" + vec1[i].lat + ";" + vec1[i].lon + ";SOUTH_EAST;30";
+        msg2 = "2;" + vec2[i].lat + ";" + vec2[i].lon + ";SOUTH;30";
+        updateMarker(msg1);
+        updateMarker(msg2);
+        i++;                    
+        if (i < Object.keys(vec1).length) {          
+            updateMap();             
+        }                       
+      }, 50)
+
+    }
+
+    updateMap();
+/*
+    var msg = "1;43.722304;10.415856;NORTH;20";
+    updateMarker(msg);
+    updateMarker(msg);
+*/
+}
+
+$(function() {
+    //wsConnect();
+    track();
+});
+
+</script>
+				
+</html>
