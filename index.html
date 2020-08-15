@@ -1,0 +1,281 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <title>5G TIM-SSSA project example</title>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.16.0/umd/popper.min.js"></script>
+  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+  
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.3.4/dist/leaflet.css" 
+  integrity="sha512-puBpdR0798OZvTTbP4A8Ix/l+A4dHDD0DGqYW6RQ+9jxkRFclaxxQb/SJAWZfWAkuyeQUytO7+7N4QKrDh+drA=="
+  crossorigin=""/>
+  <script src="https://unpkg.com/leaflet@1.3.4/dist/leaflet.js"
+  integrity="sha512-nMMmRyTVoLYqjP9hrbed9S+FzjZHW5gY1TWCHA5ckwXZBadntCNs8kEqAWdrb9O7rxbCaA4lKTIWjDXZxflOcA=="
+  crossorigin=""></script>
+  <script src="https://code.jquery.com/jquery-3.3.1.min.js"
+  integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8="
+  crossorigin="anonymous"></script>
+
+  <!--style>html, body {width: 100%;height: 100%;margin: 0;padding: 0;}</style-->
+  <style>#map {position:absolute;top:0;bottom:0;right:0;left:0;}</style>
+  <style>#map {
+        position: relative;
+        width: 100.0%;
+        height: 100.0%;
+        left: 0.0%;
+        top: 0.0%;
+        }
+        .popupCustom .leaflet-popup-tip,
+        .popupCustom .leaflet-popup-content-wrapper {
+                background:#FA1919;
+                color:#FFFFFF;
+                font-size:14px;
+                line-height:15px;
+                text-align: center;
+                border-radius: 5px;
+                border-color: yellow;
+                padding: 0px;
+                margin: 0px;
+        }
+  </style>
+</head>
+
+<body>
+
+  <div class="container-fluid">
+    <div class="row">                                               <!--top/head page-->
+      <div class="col-md-12 border">
+        <p class="text-center">TIM-SSSA - VRU recognition</p>
+      </div>
+    </div>
+    <div class="row">                                               <!--middle/main page-->
+      <div class="col-sm-2 border">                                         <!--left/infos-->
+        <div class="row-sm-4">
+          <h3>Car 1</h3>
+          <p>Front - 100 m</p>      <!--change static to dynamic info-->
+        </div>
+        <div class="row-sm-4">
+          <h3> Car 2</h3>
+          <p>Back - 150 m</p>       <!--change static to dynamic info-->
+        </div>
+        <div class="row-sm-4">
+          <h3>Car 3</h3>
+          <p>Left - 200 m</p>       <!--change static to dynamic info-->
+        </div>
+        <div class="row-sm-4">
+          <h3>Car 4</h3>
+          <p>Right - 250 m</p>      <!--change static to dynamic info-->
+        </div>
+      </div>
+      <div class="col">                                                     <!--right/map-->
+        <p class="text-center"> OpenStreetMap view</p>
+        <div class="popupCustom" id="map" ></div>
+      </div>
+    </div>
+    <div class="row">                                               <!--bottom page-->
+      <div class="col-md-12 border">
+        <p class="text-right">Current Car: 1 - VRU on the left. Next intersection at 100m. VRU distance: 300m</p>
+      </div>
+    </div>
+  </div>
+</body>
+
+
+<script>
+  var bounds = null;
+  var markers_objs = Array();
+
+  lat_pedestrian=43.71822;
+  lng_pedestrian=10.42504;
+
+  var map = L.map(
+          'map', {
+          center: [43.71830, 10.42472 ],
+          zoom: 20,
+          maxBounds: bounds,
+          layers: [],
+          worldCopyJump: false,
+          crs: L.CRS.EPSG3857,
+          zoomControl: true,
+          });
+
+  var tile_layer = L.tileLayer(
+          'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
+            {
+            "attribution": null,
+            "detectRetina": false,
+            "maxNativeZoom": 18,
+            "maxZoom": 18,
+            "minZoom": 0,
+            "noWrap": false,
+            "opacity": 1,
+            "subdomains": "abc",
+            "tms": false
+            }
+          ).addTo(map);
+
+  var basestationIcon = L.icon({
+          iconUrl: 'icons/basestation.png',
+          iconSize:     [50, 50], // size of the icon
+          popupAnchor:  [-3, -76] // point from which the popup should open relative to the iconAnchor
+  });
+  L.marker([43.71830, 10.42472], {icon: basestationIcon}).addTo(map);
+
+  var pedestrianIcon = L.icon({
+          iconUrl: 'icons/pedestrian.png',
+          iconSize:     [20, 40], // size of the icon
+          popupAnchor:  [-3, -76] // point from which the popup should open relative to the iconAnchor
+  });
+
+  var carIcon = L.Icon.extend({
+      options: {
+                  iconSize:     [40, 40], // size of the icon
+                  popupAnchor:  [-3, -76] // point from which the popup should open relative to the iconAnchor
+      }
+  });
+  var green_N   = new carIcon({ iconUrl: 'icons/green_N.png' });
+  var green_N_E = new carIcon({ iconUrl: 'icons/green_N_E.png' });
+  var green_E   = new carIcon({ iconUrl: 'icons/green_E.png' });
+  var green_S_E = new carIcon({ iconUrl: 'icons/green_S_E.png'});
+  var green_S   = new carIcon({ iconUrl: 'icons/green_S.png' });
+  var green_S_O = new carIcon({ iconUrl: 'icons/green_S_O.png' });
+  var green_O   = new carIcon({ iconUrl: 'icons/green_O.png' });
+  var green_N_O = new carIcon({ iconUrl: 'icons/green_N_O.png' });
+
+  var red_N   = new carIcon({ iconUrl: 'icons/red_N.png' });
+  var red_N_E = new carIcon({ iconUrl: 'icons/red_N_E.png' });
+  var red_E   = new carIcon({ iconUrl: 'icons/red_E.png' });
+  var red_S_E = new carIcon({ iconUrl: 'icons/red_S_E.png'});
+  var red_S   = new carIcon({ iconUrl: 'icons/red_S.png' });
+  var red_S_O = new carIcon({ iconUrl: 'icons/red_S_O.png' });
+  var red_O   = new carIcon({ iconUrl: 'icons/red_O.png' });
+  var red_N_O = new carIcon({ iconUrl: 'icons/red_N_O.png' });
+
+
+  function setObjCardinality(id, cardinality, style) {        //id: which car?      cardinality: cardinal direction      style: color
+      switch (cardinality) {                                  //is 'id' and 'style' doing the same thing? [choosing the colored-arrow to be update?]
+          case 'NORTH':
+          if (style == 0) markers_objs[id].setIcon(green_N)
+          else markers_objs[id].setIcon(red_N);
+          break;
+
+          case 'NORTH_EAST':
+          if (style == 0) markers_objs[id].setIcon(green_N_E)
+          else markers_objs[id].setIcon(red_N_E);
+          break;
+
+          case 'EAST':
+          if (style == 0) markers_objs[id].setIcon(green_E)
+          else markers_objs[id].setIcon(red_E);
+          break;
+
+          case 'SOUTH_EAST':
+          if (style == 0) markers_objs[id].setIcon(green_S_E)
+          else markers_objs[id].setIcon(red_S_E);
+          break;
+
+          case 'SOUTH':
+          if (style == 0) markers_objs[id].setIcon(green_S)
+          else markers_objs[id].setIcon(red_S);
+          break;
+
+          case 'SOUTH_WEST':
+          if (style == 0) markers_objs[id].setIcon(green_S_O) 
+          else markers_objs[id].setIcon(red_S_O);
+          break;
+
+          case 'WEST':
+          if (style == 0) markers_objs[id].setIcon(green_O)
+          else markers_objs[id].setIcon(red_O);
+          break;
+
+          case 'NORTH_WEST':
+          if (style == 0) markers_objs[id].setIcon(green_N_O)
+          else markers_objs[id].setIcon(red_N_O);
+          break;
+      }
+  }
+
+  function updateMarker(data) {
+      values = data.toString().split(";");
+      id = parseInt(values[0]);
+      lat = parseFloat(values[1]);
+      lng = parseFloat(values[2]);
+      cardinality = values[3];
+      distance = parseInt(values[4]);
+      
+      if (markers_objs[id]) {
+          markers_objs[id].setLatLng([lat, lng]);
+          if (id == 0) {  // Pedestrian
+              console.log("Pedestrian: "+ lat + "," + lng);
+              lat_pedestrian=lat;
+              lng_pedestrian=lng;
+              markers_objs[id].setIcon(pedestrianIcon);
+          } else {        // Vehicles
+              console.log('Vehicle['+ id +']: ' + lat + ',' + lng + ',' + cardinality + ' at ' + distance + 'm');
+              if (distance > 25) {
+                  setObjCardinality(id,  cardinality, 0);
+              } else {
+                  setObjCardinality(id, cardinality, 1);
+                  var popup = L.popup({
+                    closeButton: false,
+                    autoclose: false,
+                    maxWidth: 100,
+                    maxHeight: 40,
+                    offset: [0,-20]
+                    })
+                  .setLatLng([lat_pedestrian, lng_pedestrian]) 
+                  .setContent("<b>WARNING</br>" + distance + 'm</b>')
+                  .openOn(map)
+                  setTimeout(function() {
+                    map.closePopup();
+                    }, 2000)
+              }
+          }
+      } else {            // Not existing objects
+          var marker_obj = L.marker([lat, lng], {icon: ((id == 0) ? pedestrianIcon : green_N)});
+          markers_objs[id] = marker_obj;
+          if (id == 0) {
+              lat_pedestrian=lat;
+              lng_pedestrian=lng;
+              console.log('New Pedestrian: id='+ id + ' at ' + lat + "," + lng);
+          } else {
+              setObjCardinality(id,  cardinality, 0);
+              console.log('New Vehicle: id=' + id + ' at ' + lat + "," + lng + ',' + cardinality + ' at ' + distance);
+          }
+          markers_objs[id].addTo(map);
+      }
+  }
+
+  function wsConnect() {
+      //var ws = new WebSocket('ws://10.30.3.2:4999');
+          var ws = new WebSocket('ws://10.9.9.7:4999');
+
+      ws.onmessage = function (message) {
+          //console.log(message);
+          updateMarker(message.data);
+      };
+
+      ws.onclose = function(e) {
+          console.log("WebSocket error (retry in 1 second...): " + e.reason);
+          setTimeout(function() {
+              wsConnect();
+          }, 1000);
+      };
+
+      ws.onerror = function(err) {
+          console.log("Websocket error: " + err);
+          ws.close();
+      };
+  }
+
+  $(function() {
+      wsConnect(); 
+  });
+</script>
+				
+</html>
