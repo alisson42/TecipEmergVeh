@@ -155,47 +155,98 @@
   var red_O   = new carIcon({ iconUrl: 'icons/red_O.png' });
   var red_N_O = new carIcon({ iconUrl: 'icons/red_N_O.png' });
 
+  var blue_N   = new carIcon({ iconUrl: 'icons/blue_N.png' });
+  var blue_N_E = new carIcon({ iconUrl: 'icons/blue_N_E.png' });
+  var blue_E   = new carIcon({ iconUrl: 'icons/blue_E.png' });
+  var blue_S_E = new carIcon({ iconUrl: 'icons/blue_S_E.png'});
+  var blue_S   = new carIcon({ iconUrl: 'icons/blue_S.png' });
+  var blue_S_O = new carIcon({ iconUrl: 'icons/blue_S_O.png' });
+  var blue_O   = new carIcon({ iconUrl: 'icons/blue_O.png' });
+  var blue_N_O = new carIcon({ iconUrl: 'icons/blue_N_O.png' });
+
+  var yellow_N   = new carIcon({ iconUrl: 'icons/yellow_N.png' });
+  var yellow_N_E = new carIcon({ iconUrl: 'icons/yellow_N_E.png' });
+  var yellow_E   = new carIcon({ iconUrl: 'icons/yellow_E.png' });
+  var yellow_S_E = new carIcon({ iconUrl: 'icons/yellow_S_E.png'});
+  var yellow_S   = new carIcon({ iconUrl: 'icons/yellow_S.png' });
+  var yellow_S_O = new carIcon({ iconUrl: 'icons/yellow_S_O.png' });
+  var yellow_O   = new carIcon({ iconUrl: 'icons/yellow_O.png' });
+  var yellow_N_O = new carIcon({ iconUrl: 'icons/yellow_N_O.png' });
+
+  var black_N   = new carIcon({ iconUrl: 'icons/black_N.png' });
+  var black_N_E = new carIcon({ iconUrl: 'icons/black_N_E.png' });
+  var black_E   = new carIcon({ iconUrl: 'icons/black_E.png' });
+  var black_S_E = new carIcon({ iconUrl: 'icons/black_S_E.png'});
+  var black_S   = new carIcon({ iconUrl: 'icons/black_S.png' });
+  var black_S_O = new carIcon({ iconUrl: 'icons/black_S_O.png' });
+  var black_O   = new carIcon({ iconUrl: 'icons/black_O.png' });
+  var black_N_O = new carIcon({ iconUrl: 'icons/black_N_O.png' });
+
 
   function setObjCardinality(id, cardinality, style) {        //id: which car?      cardinality: cardinal direction      style: color
       switch (cardinality) {                                  //is 'id' and 'style' doing the same thing? [choosing the colored-arrow to be update?]
           case 'NORTH':
-          if (style == 0) markers_objs[id].setIcon(green_N)
-          else markers_objs[id].setIcon(red_N);
+          if (style == 0) markers_objs[id].setIcon(green_N);
+          else if (style == )  markers_objs[id].setIcon(red_N);
+          else if (style == )  markers_objs[id].setIcon(blue_N);
+          else if (style == )  markers_objs[id].setIcon(yellow_N);
+          else markers_objs[id].setIcon(black_N);
           break;
 
           case 'NORTH_EAST':
-          if (style == 0) markers_objs[id].setIcon(green_N_E)
-          else markers_objs[id].setIcon(red_N_E);
+          if (style == 0) markers_objs[id].setIcon(green_N_E);
+          else if (style == 1)  markers_objs[id].setIcon(red_N_E);
+          else if (style == 2)  markers_objs[id].setIcon(blue_N_E);
+          else if (style == 3)  markers_objs[id].setIcon(yellow_N_E);
+          else markers_objs[id].setIcon(black_N_E);
           break;
 
           case 'EAST':
-          if (style == 0) markers_objs[id].setIcon(green_E)
-          else markers_objs[id].setIcon(red_E);
+          if (style == 0) markers_objs[id].setIcon(green_E);
+          else if (style == 1)  markers_objs[id].setIcon(red_E);
+          else if (style == 2)  markers_objs[id].setIcon(blue_E);
+          else if (style == 3)  markers_objs[id].setIcon(yellow_E);
+          else markers_objs[id].setIcon(black_E);
           break;
 
           case 'SOUTH_EAST':
-          if (style == 0) markers_objs[id].setIcon(green_S_E)
-          else markers_objs[id].setIcon(red_S_E);
+          if (style == 0) markers_objs[id].setIcon(green_S_E);
+          else if (style == 1)  markers_objs[id].setIcon(red_S_E);
+          else if (style == 2)  markers_objs[id].setIcon(blue_S_E);
+          else if (style == 3)  markers_objs[id].setIcon(yellow_S_E);
+          else markers_objs[id].setIcon(black_S_E);
           break;
 
           case 'SOUTH':
-          if (style == 0) markers_objs[id].setIcon(green_S)
-          else markers_objs[id].setIcon(red_S);
+          if (style == 0) markers_objs[id].setIcon(green_S);
+          else if (style == 1)  markers_objs[id].setIcon(red_S);
+          else if (style == 2)  markers_objs[id].setIcon(blue_S);
+          else if (style == 3)  markers_objs[id].setIcon(yellow_S);
+          else markers_objs[id].setIcon(black_S);
           break;
 
           case 'SOUTH_WEST':
-          if (style == 0) markers_objs[id].setIcon(green_S_O) 
-          else markers_objs[id].setIcon(red_S_O);
+          if (style == 0) markers_objs[id].setIcon(green_S_O);
+          else if (style == 1)  markers_objs[id].setIcon(red_S_O);
+          else if (style == 2)  markers_objs[id].setIcon(blue_S_O);
+          else if (style == 3)  markers_objs[id].setIcon(yellow_S_O);
+          else markers_objs[id].setIcon(black_S_O);
           break;
 
           case 'WEST':
-          if (style == 0) markers_objs[id].setIcon(green_O)
-          else markers_objs[id].setIcon(red_O);
+          if (style == 0) markers_objs[id].setIcon(green_O);
+          else if (style == 1)  markers_objs[id].setIcon(red_O);
+          else if (style == 2)  markers_objs[id].setIcon(blue_O);
+          else if (style == 3)  markers_objs[id].setIcon(yellow_O);
+          else markers_objs[id].setIcon(black_O);
           break;
 
           case 'NORTH_WEST':
-          if (style == 0) markers_objs[id].setIcon(green_N_O)
-          else markers_objs[id].setIcon(red_N_O);
+          if (style == 0) markers_objs[id].setIcon(green_N_O);
+          else if (style == 1)  markers_objs[id].setIcon(red_N_O);
+          else if (style == 2)  markers_objs[id].setIcon(blue_N_O);
+          else if (style == 3)  markers_objs[id].setIcon(yellow_N_O);
+          else markers_objs[id].setIcon(black_N_O);
           break;
       }
   }
