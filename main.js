@@ -108,6 +108,7 @@
   const EarthRadiusInKilometers = 6367.0;
   const kmToMiles = 0.621371192;
 
+  var current_position = [];
 /*----end global variabels----*/
 
 
@@ -227,9 +228,13 @@
               lat_pedestrian=lat;
               lng_pedestrian=lng;
               console.log('New Pedestrian: id='+ id + ' at ' + lat + "," + lng);
+              current_position[id][1] = lat_pedestrian;
+              current_position[id][2] = lng_pedestrian;
           } else {
               setObjCardinality(id,  cardinality, 0);
               console.log('New Vehicle: id=' + id + ' at ' + lat + "," + lng + ',' + cardinality + ' at ' + distance);
+              current_position[id][1] = lat;
+              current_position[id][2] = lng;
           }
           markers_objs[id].addTo(map);
       } // end if/else id
@@ -272,6 +277,14 @@
   
   ///Function to track the devices (pedestrian and vehicle)
   function track(){
+
+      //creating a matrix 6x3 to hold the current position of the devices
+      for(var k=0; k<6; k++){
+          current_position[k] = new Array(3);
+          current_position[k][0] = k;
+      }
+      console.log("matrix: " + current_position);
+
       let vec1 = [          //vector with the coordanate points of the Emergency Vehicle (black) running the 'Via Vittorio Veneto' in Viareggio
         {
           "lat": 43.86643845535094,
@@ -502,14 +515,24 @@
       ///Function to treat the json with the coordenates
       function updateMap() {         
         setTimeout(function() {
+          var angle=0, delta_x=0, delta_y=0, ddist=0;
 
           //if the vector vec1 wasn't entirely read:
           if(i<Object.keys(vec1).length){
               //calculating distance between the car and the pedestrian [useless! just an e.g.]
               var abs_dist = CalcDistance(vec1[i].lat, vec1[i].lon, lat_pedestrian, lng_pedestrian, EarthRadiusInKilometers);
 
+              //evaluating difference between next and last position (angle and instantaneus velocity)
+              if(i!=0){
+                  delta_x = vec1[i].lat - current_position[id_black][1];
+                  delta_y = vec1[i].lon - current_position[id_black][2];
+                  angle = Math.atan2(delta_x,delta_y) * 180 / Math.PI;  //0 = east; 90 = north; 180 = west; -90 = south; -135 = south_west; -45 = south_east; 45 = north_east; 135 = north_west
+                  ddist = CalcDistance(current_position[id_black][1], current_position[id_black][2], vec1[i].lat, vec1[i].lon, EarthRadiusInKilometers);
+                  console.log("BLACK: dx="+delta_x+";  dy="+delta_y+";  angle="+angle+" degrees;  dist="+ddist+" km");
+              }
+
               //parsing json (w/ latitude and longitude info) and building the msg to be handle in the function updateMarker()
-              msg1 = id_black + ";" + vec1[i].lat + ";" + vec1[i].lon + ";NORTH_WEST;"+ abs_dist;
+              msg1 = id_black + ";" + vec1[i].lat + ";" + vec1[i].lon + ";NORTH_WEST;"+ abs_dist;   //change: instead of "NORTH_WEST" inform the 'angle'
 
               //calling function updateMarker()
               updateMarker(msg1);
@@ -521,6 +544,11 @@
           //the same as for the IF above, but for vec2
           if(j<Object.keys(vec2).length){
             var abs_dist = CalcDistance(vec1[i-1].lat, vec1[i-1].lon, vec2[j].lat, vec2[j].lon, EarthRadiusInKilometers); // just an e.g. (calculating the absolute distance between the car and the Emergency Vehicle)
+            if(j!=0){
+                delta_x = vec2[j].lat - current_position[id_green][1]; delta_y = vec2[j].lon - current_position[id_green][2]; angle = Math.atan2(delta_x,delta_y) * 180 / Math.PI;
+                ddist = CalcDistance(current_position[id_green][1], current_position[id_green][2], vec2[j].lat, vec2[j].lon, EarthRadiusInKilometers);
+                console.log("GREEN: dx="+delta_x+";  dy="+delta_y+";  angle="+angle+" degrees;  dist="+ddist+" km");
+            }
             msg2 = id_green + ";" + vec2[j].lat + ";" + vec2[j].lon + ";WEST;"+ abs_dist;
             updateMarker(msg2);
             j++;
