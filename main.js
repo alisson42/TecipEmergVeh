@@ -537,6 +537,10 @@
               //calling function updateMarker()
               updateMarker(msg1);
 
+              //update the current position saved in the matrix
+              current_position[id_black][1] = vec1[i].lat;
+              current_position[id_black][2] = vec1[i].lon;
+
               //walk to the next position in the vector in json (w/ latitude and longitude info)
               i++;
           }//end if vec1
@@ -551,6 +555,8 @@
             }
             msg2 = id_green + ";" + vec2[j].lat + ";" + vec2[j].lon + ";WEST;"+ abs_dist;
             updateMarker(msg2);
+            current_position[id_green][1] = vec2[j].lat;
+            current_position[id_green][2] = vec2[j].lon;
             j++;
           }//end if vec2
 
