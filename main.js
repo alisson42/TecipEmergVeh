@@ -1371,10 +1371,6 @@
         {
           "lat": 43.86721582090946,
           "lon": 10.251654982566833
-        },
-        {
-          "lat": 43.86718101371322,
-          "lon": 10.251676440238953
         }
       ];                    //end vec[id_yellow] with Yellow Vehicle positions
 
@@ -2682,6 +2678,12 @@
               console.log('Distance between blue and black: ' + CalcDistance(vec[id_black][i[id_black]-1].lat, vec[id_black][i[id_black]-1].lon, vec[id_blue][i[id_blue]-1].lat, vec[id_blue][i[id_blue]-1].lon, EarthRadiusInKilometers) + " km");
               console.log('Distance between yellow and black: ' + CalcDistance(vec[id_black][i[id_black]-1].lat, vec[id_black][i[id_black]-1].lon, vec[id_yellow][i[id_yellow]-1].lat, vec[id_yellow][i[id_yellow]-1].lon, EarthRadiusInKilometers) + " km");
               console.log(' ');
+              //if one vehicle ended, but the others didn't, so repeat the last (to update the distances)
+              if(i[id_green]==Object.keys(vec[id_green]).length) i[id_green]--;
+              if(i[id_red]==Object.keys(vec[id_red]).length) i[id_red]--;
+              if(i[id_blue]==Object.keys(vec[id_blue]).length) i[id_blue]--;
+              if(i[id_yellow]==Object.keys(vec[id_yellow]).length) i[id_yellow]--;
+              if(i[id_black]==Object.keys(vec[id_black]).length) i[id_black]--;
           }
         }, update_time) //execute the loop every 'update_time' = 150ms
 
