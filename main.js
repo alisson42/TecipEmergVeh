@@ -7,7 +7,7 @@
 
   var map = L.map(
           'map', {
-          center: [43.87043, 10.249689],
+          center: [43.87097, 10.249689],
           zoom: 14.6,
           maxBounds: bounds,
           layers: [],
@@ -2642,8 +2642,12 @@
           for(var k=1; k<6; k++){
               //if the vector vec[k] wasn't entirely read:
               if(i[k]<Object.keys(vec[k]).length){
-                  //calculating distance between the car and the pedestrian [useless! just an e.g.]
+                  //calculating distance between the car and the emergency vehicle
                   var abs_dist = CalcDistance(vec[k][i[k]].lat, vec[k][i[k]].lon, current_position[id_black][1], current_position[id_black][2], EarthRadiusInKilometers);
+
+                  //write this distance from the emergency vehicle in the page
+                  if(k!=id_black)
+                      document.getElementById("car"+k).innerHTML = (abs_dist*1000);
 
                   //evaluating difference between next and last position (angle and instantaneus velocity)
                   if(i[k]!=0){
