@@ -1,0 +1,21 @@
+html, body {
+	height: 100%;
+	}
+.container-fluid {
+	background: seashell;
+}
+#map {
+	position: relative;
+}
+.popupCustom .leaflet-popup-tip,
+.popupCustom .leaflet-popup-content-wrapper {
+	background:#FA1919;
+	color:#FFFFFF;
+	font-size:14px;
+	line-height:15px;
+	text-align: center;
+	border-radius: 5px;
+	border-color: yellow;
+	padding: 0px;
+	margin: 0px;
+}

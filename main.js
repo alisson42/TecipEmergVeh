@@ -2,13 +2,10 @@
   var bounds = null;
   var markers_objs = Array();
 
-  lat_pedestrian=43.875437;    //before: 43.71822;
-  lng_pedestrian=10.246500;    //before: 10.42504;
-
   var map = L.map(
           'map', {
           center: [43.87097, 10.249689],
-          zoom: 14.6,
+          zoom: 16.0,
           maxBounds: bounds,
           layers: [],
           worldCopyJump: false,
@@ -30,20 +27,6 @@
             "tms": false
             }
           ).addTo(map);
-
-  var basestationIcon = L.icon({
-          iconUrl: 'icons/basestation.png',
-          iconSize:     [50, 50], // size of the icon
-          popupAnchor:  [-3, -76] // point from which the popup should open relative to the iconAnchor
-  });
-  L.marker([43.71830, 10.42472], {icon: basestationIcon}).addTo(map);
-
-  var pedestrianIcon = L.icon({
-          iconUrl: 'icons/pedestrian.png',
-          iconSize:     [20, 40], // size of the icon
-          popupAnchor:  [-3, -76] // point from which the popup should open relative to the iconAnchor
-  });
-  L.marker([lat_pedestrian, lng_pedestrian], {icon: pedestrianIcon}).addTo(map);
 
   var carIcon = L.Icon.extend({
       options: {
@@ -88,21 +71,13 @@
   var yellow_O   = new carIcon({ iconUrl: 'icons/yellow_O.png' });
   var yellow_N_O = new carIcon({ iconUrl: 'icons/yellow_N_O.png' });
 
-  var black_N   = new carIcon({ iconUrl: 'icons/black_N.png' });
-  var black_N_E = new carIcon({ iconUrl: 'icons/black_N_E.png' });
-  var black_E   = new carIcon({ iconUrl: 'icons/black_E.png' });
-  var black_S_E = new carIcon({ iconUrl: 'icons/black_S_E.png'});
-  var black_S   = new carIcon({ iconUrl: 'icons/black_S.png' });
-  var black_S_O = new carIcon({ iconUrl: 'icons/black_S_O.png' });
-  var black_O   = new carIcon({ iconUrl: 'icons/black_O.png' });
-  var black_N_O = new carIcon({ iconUrl: 'icons/black_N_O.png' });
+  var emergencyIcon = new carIcon({ iconUrl: 'icons/RedSirenFlashing.png' });
 
-  const id_pedest = 0;
   const id_green = 1;
   const id_red = 2;
   const id_blue = 3;
   const id_yellow = 4;
-  const id_black = 5;
+  const id_emergency = 5;
 
   const EarthRadiusInMiles = 3956.0;
   const EarthRadiusInKilometers = 6367.0;
@@ -111,58 +86,56 @@
   var current_position = [];
 /*----end global variabels----*/
 
-
-
-  ///Function to select (by id) 'arrow icon' to represent the car in the map
+  // Function to select (by id) 'arrow icon' to represent the car in the map
   function setObjCardinality(id, cardinality, style) {          //id:= which car      cardinality:= angle      style:= (right now: NOTHING)
       if(cardinality >= 67.5 && cardinality < 112.5) {          //90 degrees = NORTH
           if (id == id_green) markers_objs[id].setIcon(green_N);
           else if (id == id_red)  markers_objs[id].setIcon(red_N);
           else if (id == id_blue)  markers_objs[id].setIcon(blue_N);
           else if (id == id_yellow)  markers_objs[id].setIcon(yellow_N);
-          else markers_objs[id].setIcon(black_N);
+          else markers_objs[id].setIcon(emergency_N);
       }
       else if(cardinality >= 22.5 && cardinality < 67.5) {      //45 degrees = NORTH_EAST
           if (id == id_green) markers_objs[id].setIcon(green_N_E);
           else if (id == id_red)  markers_objs[id].setIcon(red_N_E);
           else if (id == id_blue)  markers_objs[id].setIcon(blue_N_E);
           else if (id == id_yellow)  markers_objs[id].setIcon(yellow_N_E);
-          else markers_objs[id].setIcon(black_N_E);
+          else markers_objs[id].setIcon(emergency_N_E);
       }
       else if(cardinality >= -22.5 && cardinality < 22.5) {     //0 degrees = EAST
           if (id == id_green) markers_objs[id].setIcon(green_E);
           else if (id == id_red)  markers_objs[id].setIcon(red_E);
           else if (id == id_blue)  markers_objs[id].setIcon(blue_E);
           else if (id == id_yellow)  markers_objs[id].setIcon(yellow_E);
-          else markers_objs[id].setIcon(black_E);
+          else markers_objs[id].setIcon(emergency_E);
       }
       else if(cardinality >= -67.5 && cardinality < -22.5) {    //-45 degrees = SOUTH_EAST
           if (id == id_green) markers_objs[id].setIcon(green_S_E);
           else if (id == id_red)  markers_objs[id].setIcon(red_S_E);
           else if (id == id_blue)  markers_objs[id].setIcon(blue_S_E);
           else if (id == id_yellow)  markers_objs[id].setIcon(yellow_S_E);
-          else markers_objs[id].setIcon(black_S_E);
+          else markers_objs[id].setIcon(emergency_S_E);
       }
       else if(cardinality >= -112.5 && cardinality < -67.5) {   //-90 degrees = SOUTH
           if (id == id_green) markers_objs[id].setIcon(green_S);
           else if (id == id_red)  markers_objs[id].setIcon(red_S);
           else if (id == id_blue)  markers_objs[id].setIcon(blue_S);
           else if (id == id_yellow)  markers_objs[id].setIcon(yellow_S);
-          else markers_objs[id].setIcon(black_S);
+          else markers_objs[id].setIcon(emergency_S);
       }
       else if(cardinality >= -157.5 && cardinality < -112.5) {  //-135 degrees = SOUTH_WEST
           if (id == id_green) markers_objs[id].setIcon(green_S_O);
           else if (id == id_red)  markers_objs[id].setIcon(red_S_O);
           else if (id == id_blue)  markers_objs[id].setIcon(blue_S_O);
           else if (id == id_yellow)  markers_objs[id].setIcon(yellow_S_O);
-          else markers_objs[id].setIcon(black_S_O);
+          else markers_objs[id].setIcon(emergency_S_O);
       }
       else if(cardinality >= 112.5 && cardinality < 157.5) {    //135 degrees = NORTH_WEST
             if (id == id_green) markers_objs[id].setIcon(green_N_O);
             else if (id == id_red)  markers_objs[id].setIcon(red_N_O);
             else if (id == id_blue)  markers_objs[id].setIcon(blue_N_O);
             else if (id == id_yellow)  markers_objs[id].setIcon(yellow_N_O);
-            else markers_objs[id].setIcon(black_N_O);
+            else markers_objs[id].setIcon(emergency_N_O);
       }
       else if(cardinality >= 157.5 && cardinality <= 180
           || cardinality >= -180 && cardinality <= -157.5) {    //180 degrees = WEST
@@ -170,14 +143,12 @@
           else if (id == id_red)  markers_objs[id].setIcon(red_O);
           else if (id == id_blue)  markers_objs[id].setIcon(blue_O);
           else if (id == id_yellow)  markers_objs[id].setIcon(yellow_O);
-          else markers_objs[id].setIcon(black_O);
+          else markers_objs[id].setIcon(emergency_O);
       }
 
   } //end function setObjCardinality()
 
-
-
-  ///Function that treats 'data' to allocate the icons in the map    [data_format = id; latitude; longitude; cardinality; distance;]
+  // Function that treats 'data' to allocate the icons in the map    [data_format = id; latitude; longitude; cardinality; distance;]
   function updateMarker(data) {
       values = data.toString().split(";");
       id = parseInt(values[0]);
@@ -188,14 +159,12 @@
       
       if (markers_objs[id]) {
           markers_objs[id].setLatLng([lat, lng]);
-          if (id == id_pedest) {                              // Pedestrian
-              console.log("Pedestrian: "+ lat + "," + lng);
-              lat_pedestrian=lat;
-              lng_pedestrian=lng;
-              markers_objs[id].setIcon(pedestrianIcon);
+          if (id == id_emergency) {                              // id_emergency
+              console.log("Emergency: "+ lat + "," + lng);
+              markers_objs[id].setIcon(emergencyIcon);
           } else {                                            // Vehicles
-              console.log('Vehicle['+ id +']: ' + lat + ',' + lng + ',' + cardinality + 'o at ' + distance + 'm');
-              if (distance > 25 || id == id_black) {
+              console.log('Car['+ id +']: ' + lat + ',' + lng + ',' + cardinality + 'o at ' + distance + 'm');
+              if (distance > 25) {
                   setObjCardinality(id,  cardinality, 0);     //if far: style = 0 [not treated yet, in the function setObjCardinality()]
               } else {
                   setObjCardinality(id, cardinality, 1);      //if close: style = 1 [not treated yet, in the function setObjCardinality()]
@@ -206,7 +175,7 @@
                     maxHeight: 40,
                     offset: [0,-20]
                     })
-                  .setLatLng([current_position[id_black][1], current_position[id_black][2]]) 
+                  .setLatLng([current_position[id_emergency][1], current_position[id_emergency][2]]) 
                   .setContent("<b>WARNING</br>" + distance + 'm</b>')
                   .openOn(map)
                   setTimeout(function() {
@@ -215,19 +184,17 @@
               }
           }
       } else {                                                // Not existing objects
-          var marker_obj = L.marker([lat, lng], {icon: ((id == id_pedest) ? pedestrianIcon : green_N)});
+          var marker_obj = L.marker([lat, lng], {icon: ((id == id_emergency) ? emergencyIcon : green_N)});
           markers_objs[id] = marker_obj;
-          if (id == id_pedest) {
-              lat_pedestrian=lat;
-              lng_pedestrian=lng;
-              console.log('New Pedestrian: id='+ id + ' at ' + lat + "," + lng);
-              current_position[id][1] = lat_pedestrian;
-              current_position[id][2] = lng_pedestrian;
-          } else {
-              setObjCardinality(id,  cardinality, 0);
-              console.log('New Vehicle: id=' + id + ' at ' + lat + "," + lng + ',' + cardinality + ' at ' + distance);
+          if (id == id_emergency) {
               current_position[id][1] = lat;
               current_position[id][2] = lng;
+              console.log('New Emergency: id='+ id + ' at ' + lat + "," + lng);
+          } else {
+              setObjCardinality(id,  cardinality, 0);
+              current_position[id][1] = lat;
+              current_position[id][2] = lng;
+              console.log('New Car: id=' + id + ' at ' + lat + "," + lng + ',' + cardinality + ' at ' + distance);
           }
           markers_objs[id].addTo(map);
       } // end if/else id
@@ -235,7 +202,7 @@
 
 
 
-  ///Function to calculate the absolute distance between two coordenate points
+  // Function to calculate the absolute distance between two coordenate points
   
   // function CalcDistance(lat1, lng1, lat2, lng2, radius) { 
   //   return radius * 2 * Math.asin( Math.min(1, Math.sqrt( ( Math.pow(Math.sin( (lat2 - lat1) / 2.0), 2.0) + Math.cos(lat1) * Math.cos(lat2) * Math.pow(Math.sin((lng2 - lng1) / 2.0), 2.0) ) ) ) );
@@ -262,36 +229,7 @@
     }
   } //end function CalcDistance()
 
-
-
-  /*
-  ///Function to handle the socket
-  function wsConnect() {
-      //var ws = new WebSocket('ws://10.30.3.2:4999');
-          var ws = new WebSocket('ws://10.9.9.7:4999');
-
-      ws.onmessage = function (message) {
-          //console.log(message);
-          updateMarker(message.data);
-      };
-
-      ws.onclose = function(e) {
-          console.log("WebSocket error (retry in 1 second...): " + e.reason);
-          setTimeout(function() {
-              wsConnect();
-          }, 1000);
-      };
-
-      ws.onerror = function(err) {
-          console.log("Websocket error: " + err);
-          ws.close();
-      };
-  }
-  */
-
-
-  
-  ///Function to track the devices (pedestrian and vehicle)
+  // Function to track the devices (emergency and cars)
   function track(){
 
       //creating a matrix 6x3 to hold the current position of the devices
@@ -304,7 +242,7 @@
       let vec = [{},{},{},{},{},{}];
       let i=[0,0,0,0,0,0];  //initialize pointer of the vector vec[]
 
-      vec[id_black] = [     //vector with the coordanate points of the Emergency Vehicle (black) running the 'Via Vittorio Veneto' in Viareggio
+      vec[id_emergency] = [     //vector with the coordanate points of the Emergency Vehicle (emergency) running the 'Via Vittorio Veneto' in Viareggio
         {
           "lat": 43.866013027121255,
           "lon": 10.252352356910706
@@ -737,7 +675,7 @@
           "lat": 43.87543361773929,
           "lon": 10.2465158700943
         }
-      ];                    //end vec[id_black] with Emergencial Vehicle positions
+      ];                    //end vec[id_emergency] with Emergencial Vehicle positions
 
       vec[id_yellow] = [    //yellow car vector
         {
@@ -2620,32 +2558,32 @@
       ];                    //end vec[id_green] with Green Vehicle positions
 
 
-      console.log("vec[id_black]:" + Object.keys(vec[id_black]).length);    //log can be seen in the browser by Ctrl+Shift+C in the tab Console
+      console.log("vec[id_emergency]:" + Object.keys(vec[id_emergency]).length);    //log can be seen in the browser by Ctrl+Shift+C in the tab Console
       console.log("vec[id_yellow]:" + Object.keys(vec[id_yellow]).length);  //log can be seen in the browser by Ctrl+Shift+C in the tab Console
       console.log("vec[id_blue]:" + Object.keys(vec[id_blue]).length);      //log can be seen in the browser by Ctrl+Shift+C in the tab Console
       console.log("vec[id_red]:" + Object.keys(vec[id_red]).length);        //log can be seen in the browser by Ctrl+Shift+C in the tab Console
       console.log("vec[id_green]:" + Object.keys(vec[id_green]).length);    //log can be seen in the browser by Ctrl+Shift+C in the tab Console
 
 
-      var update_time = 150;//ms
+      var update_time = 150; // ms
 
-      ///Function to treat the json with the coordenates
+      // Function to treat the json with the coordenates
       function updateMap() {         
         setTimeout(function() {
           var angle=0, delta_x=0, delta_y=0, ddist=0;
 
-          //Loop to update vehicles from 1 to 5 [green, red, blue, yellow and black, respectively]
+          //Loop to update vehicles from 1 to 5 [green, red, blue, yellow and emergency, respectively]
           for(var k=1; k<6; k++){
               //if the vector vec[k] wasn't entirely read:
               if(i[k]<Object.keys(vec[k]).length){
                   //calculating distance between the car and the emergency vehicle
-                  var abs_dist = CalcDistance(vec[k][i[k]].lat, vec[k][i[k]].lon, current_position[id_black][1], current_position[id_black][2], EarthRadiusInKilometers);
+                  var abs_dist = CalcDistance(vec[k][i[k]].lat, vec[k][i[k]].lon, current_position[id_emergency][1], current_position[id_emergency][2], EarthRadiusInKilometers);
 
                   //write this distance from the emergency vehicle in the page
-                  if(k!=id_black)
+                  if(k!=id_emergency)
                       document.getElementById("car"+k).innerHTML = (abs_dist*1000);
 
-                  //evaluating difference between next and last position (angle and instantaneus velocity)
+                  //evaluating difference between next and last position (angle and instantaneous velocity)
                   if(i[k]!=0){
                       delta_x = vec[k][i[k]].lat - current_position[k][1];
                       delta_y = vec[k][i[k]].lon - current_position[k][2];
@@ -2655,7 +2593,7 @@
                   }
 
                   //parsing json (w/ latitude and longitude info) and building the msg to be handle in the function updateMarker()
-                  msg = k + ";" + vec[k][i[k]].lat + ";" + vec[k][i[k]].lon + ";"+angle+";"+ (abs_dist*1000);
+                  msg = k + ";" + vec[k][i[k]].lat + ";" + vec[k][i[k]].lon + ";"+ angle +";"+ (abs_dist*1000);
 
                   //calling function updateMarker()
                   updateMarker(msg);
@@ -2671,19 +2609,19 @@
           } //end for()
           
           //if it didn't reach the end of the vector return to beggin of the function for the next iteration
-          if (i[id_black] < Object.keys(vec[id_black]).length || i[id_yellow] < Object.keys(vec[id_yellow]).length || i[id_blue] < Object.keys(vec[id_blue]).length || i[id_red] < Object.keys(vec[id_red]).length || i[id_green] < Object.keys(vec[id_green]).length) {          
+          if (i[id_emergency] < Object.keys(vec[id_emergency]).length || i[id_yellow] < Object.keys(vec[id_yellow]).length || i[id_blue] < Object.keys(vec[id_blue]).length || i[id_red] < Object.keys(vec[id_red]).length || i[id_green] < Object.keys(vec[id_green]).length) {          
               updateMap();
-              console.log('Distance between green and black: ' + CalcDistance(vec[id_black][i[id_black]-1].lat, vec[id_black][i[id_black]-1].lon, vec[id_green][i[id_green]-1].lat, vec[id_green][i[id_green]-1].lon, EarthRadiusInKilometers) + " km");
-              console.log('Distance between red and black: ' + CalcDistance(vec[id_black][i[id_black]-1].lat, vec[id_black][i[id_black]-1].lon, vec[id_red][i[id_red]-1].lat, vec[id_red][i[id_red]-1].lon, EarthRadiusInKilometers) + " km");
-              console.log('Distance between blue and black: ' + CalcDistance(vec[id_black][i[id_black]-1].lat, vec[id_black][i[id_black]-1].lon, vec[id_blue][i[id_blue]-1].lat, vec[id_blue][i[id_blue]-1].lon, EarthRadiusInKilometers) + " km");
-              console.log('Distance between yellow and black: ' + CalcDistance(vec[id_black][i[id_black]-1].lat, vec[id_black][i[id_black]-1].lon, vec[id_yellow][i[id_yellow]-1].lat, vec[id_yellow][i[id_yellow]-1].lon, EarthRadiusInKilometers) + " km");
+              console.log('Distance between green and emergency: ' + CalcDistance(vec[id_emergency][i[id_emergency]-1].lat, vec[id_emergency][i[id_emergency]-1].lon, vec[id_green][i[id_green]-1].lat, vec[id_green][i[id_green]-1].lon, EarthRadiusInKilometers) + " km");
+              console.log('Distance between red and emergency: ' + CalcDistance(vec[id_emergency][i[id_emergency]-1].lat, vec[id_emergency][i[id_emergency]-1].lon, vec[id_red][i[id_red]-1].lat, vec[id_red][i[id_red]-1].lon, EarthRadiusInKilometers) + " km");
+              console.log('Distance between blue and emergency: ' + CalcDistance(vec[id_emergency][i[id_emergency]-1].lat, vec[id_emergency][i[id_emergency]-1].lon, vec[id_blue][i[id_blue]-1].lat, vec[id_blue][i[id_blue]-1].lon, EarthRadiusInKilometers) + " km");
+              console.log('Distance between yellow and emergency: ' + CalcDistance(vec[id_emergency][i[id_emergency]-1].lat, vec[id_emergency][i[id_emergency]-1].lon, vec[id_yellow][i[id_yellow]-1].lat, vec[id_yellow][i[id_yellow]-1].lon, EarthRadiusInKilometers) + " km");
               console.log(' ');
-              //if one vehicle ended, but the others didn't, so repeat the last (to update the distances)
+              //if one car ended, but the others didn't, so repeat the last (to update the distances)
               if(i[id_green]==Object.keys(vec[id_green]).length) i[id_green]--;
               if(i[id_red]==Object.keys(vec[id_red]).length) i[id_red]--;
               if(i[id_blue]==Object.keys(vec[id_blue]).length) i[id_blue]--;
               if(i[id_yellow]==Object.keys(vec[id_yellow]).length) i[id_yellow]--;
-              if(i[id_black]==Object.keys(vec[id_black]).length) i[id_black]--;
+              if(i[id_emergency]==Object.keys(vec[id_emergency]).length) i[id_emergency]--;
           }
         }, update_time) //execute the loop every 'update_time' = 150ms
 
@@ -2693,10 +2631,35 @@
 
   } //end function track()
 
+  
+  ///Function to handle the socket
+  function wsConnect() {
+      //var ws = new WebSocket('ws://10.30.3.2:4999');
+          var ws = new WebSocket('ws://10.9.9.7:4999');
+
+      ws.onmessage = function (message) {
+          //console.log(message);
+          updateMarker(message.data);
+      };
+
+      ws.onclose = function(e) {
+          console.log("WebSocket error (retry in 1 second...): " + e.reason);
+          setTimeout(function() {
+              wsConnect();
+          }, 1000);
+      };
+
+      ws.onerror = function(err) {
+          console.log("Websocket error: " + err);
+          ws.close();
+      };
+  }
 
 
   ///(if I remember well... the function started with $ will be auto-called, which means that is the) Main function
   $(function() {
     //wsConnect();    //handle the socket [communication with the basestation]
-    track();          //handle the positions of the devices [vehicles and pedestrian]
+    track();          //handle the positions of the devices [emergency and car]
   }); //end of $function()
+  
+  
