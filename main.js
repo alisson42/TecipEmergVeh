@@ -1998,7 +1998,7 @@
                   if(i[k]!=0){
                       delta_x = vec[k][i[k]].lat - current_position[k][1];
                       delta_y = vec[k][i[k]].lon - current_position[k][2];
-                      angle = Math.atan2(delta_x,delta_y) * 180 / Math.PI;  //0 = east; 90 = north; 180 = west; -90 = south; -135 = south_west; -45 = south_east; 45 = north_east; 135 = north_west
+                      angle = -(Math.atan2(delta_x,delta_y) * 180 / Math.PI - 90);
                       ddist = CalcDistance(current_position[k][1], current_position[k][2], vec[k][i[k]].lat, vec[k][i[k]].lon, EarthRadiusInKilometers);
 //                      console.log("Vehicle["+k+"]: angle = "+angle.toFixed(2)+" degrees;  dist = "+(ddist*1000).toFixed(2)+" m;  velocity = "+((ddist/update_time)*1e6).toFixed(2)+" m/s = "+((ddist/update_time)*3.6e6).toFixed(2)+" km/h");
                       console.log("Vehicle["+k+"]:  dx = "+delta_x+"  dy = "+delta_y+"  angle = "+angle.toFixed(2)+" degrees");
