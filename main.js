@@ -30,8 +30,8 @@
 
   var carIcon = L.Icon.extend({
       options: {
-                  iconSize:     [40, 40], // size of the icon
-                  popupAnchor:  [-3, -76] // point from which the popup should open relative to the iconAnchor
+          iconSize:     [40, 40], // size of the icon
+          popupAnchor:  [-3, -76] // point from which the popup should open relative to the iconAnchor
       }
   });
 
@@ -73,11 +73,11 @@
 
   var emergencyIcon = new carIcon({ iconUrl: 'icons/RedSirenFlashing.png' });
 
+  const id_emergency = 0;
   const id_green = 1;
   const id_red = 2;
   const id_blue = 3;
   const id_yellow = 4;
-  const id_emergency = 5;
 
   const EarthRadiusInMiles = 3956.0;
   const EarthRadiusInKilometers = 6367.0;
@@ -86,69 +86,77 @@
   var current_position = [];
 /*----end global variabels----*/
 
-  // Function to select (by id) 'arrow icon' to represent the car in the map
+  /// Function to select (by id) 'arrow icon' to represent the car in the map
   function setObjCardinality(id, cardinality, style) {          //id:= which car      cardinality:= angle      style:= (right now: NOTHING)
-      if(cardinality >= 67.5 && cardinality < 112.5) {          //90 degrees = NORTH
-          if (id == id_green) markers_objs[id].setIcon(green_N);
-          else if (id == id_red)  markers_objs[id].setIcon(red_N);
-          else if (id == id_blue)  markers_objs[id].setIcon(blue_N);
-          else if (id == id_yellow)  markers_objs[id].setIcon(yellow_N);
-          else markers_objs[id].setIcon(emergency_N);
-      }
-      else if(cardinality >= 22.5 && cardinality < 67.5) {      //45 degrees = NORTH_EAST
-          if (id == id_green) markers_objs[id].setIcon(green_N_E);
-          else if (id == id_red)  markers_objs[id].setIcon(red_N_E);
-          else if (id == id_blue)  markers_objs[id].setIcon(blue_N_E);
-          else if (id == id_yellow)  markers_objs[id].setIcon(yellow_N_E);
-          else markers_objs[id].setIcon(emergency_N_E);
-      }
-      else if(cardinality >= -22.5 && cardinality < 22.5) {     //0 degrees = EAST
-          if (id == id_green) markers_objs[id].setIcon(green_E);
-          else if (id == id_red)  markers_objs[id].setIcon(red_E);
-          else if (id == id_blue)  markers_objs[id].setIcon(blue_E);
-          else if (id == id_yellow)  markers_objs[id].setIcon(yellow_E);
-          else markers_objs[id].setIcon(emergency_E);
-      }
-      else if(cardinality >= -67.5 && cardinality < -22.5) {    //-45 degrees = SOUTH_EAST
-          if (id == id_green) markers_objs[id].setIcon(green_S_E);
-          else if (id == id_red)  markers_objs[id].setIcon(red_S_E);
-          else if (id == id_blue)  markers_objs[id].setIcon(blue_S_E);
-          else if (id == id_yellow)  markers_objs[id].setIcon(yellow_S_E);
-          else markers_objs[id].setIcon(emergency_S_E);
-      }
-      else if(cardinality >= -112.5 && cardinality < -67.5) {   //-90 degrees = SOUTH
-          if (id == id_green) markers_objs[id].setIcon(green_S);
-          else if (id == id_red)  markers_objs[id].setIcon(red_S);
-          else if (id == id_blue)  markers_objs[id].setIcon(blue_S);
-          else if (id == id_yellow)  markers_objs[id].setIcon(yellow_S);
-          else markers_objs[id].setIcon(emergency_S);
-      }
-      else if(cardinality >= -157.5 && cardinality < -112.5) {  //-135 degrees = SOUTH_WEST
-          if (id == id_green) markers_objs[id].setIcon(green_S_O);
-          else if (id == id_red)  markers_objs[id].setIcon(red_S_O);
-          else if (id == id_blue)  markers_objs[id].setIcon(blue_S_O);
-          else if (id == id_yellow)  markers_objs[id].setIcon(yellow_S_O);
-          else markers_objs[id].setIcon(emergency_S_O);
-      }
-      else if(cardinality >= 112.5 && cardinality < 157.5) {    //135 degrees = NORTH_WEST
-            if (id == id_green) markers_objs[id].setIcon(green_N_O);
-            else if (id == id_red)  markers_objs[id].setIcon(red_N_O);
-            else if (id == id_blue)  markers_objs[id].setIcon(blue_N_O);
-            else if (id == id_yellow)  markers_objs[id].setIcon(yellow_N_O);
-            else markers_objs[id].setIcon(emergency_N_O);
-      }
-      else if(cardinality >= 157.5 && cardinality <= 180
-          || cardinality >= -180 && cardinality <= -157.5) {    //180 degrees = WEST
-          if (id == id_green) markers_objs[id].setIcon(green_O);
-          else if (id == id_red)  markers_objs[id].setIcon(red_O);
-          else if (id == id_blue)  markers_objs[id].setIcon(blue_O);
-          else if (id == id_yellow)  markers_objs[id].setIcon(yellow_O);
-          else markers_objs[id].setIcon(emergency_O);
-      }
+      //set icon and angle based on id [soft and continous]
+      if (id == id_green) markers_objs[id].setIcon(green_N).setRotationAngle(cardinality);
+      else if (id == id_red)  markers_objs[id].setIcon(red_N).setRotationAngle(cardinality);
+      else if (id == id_blue)  markers_objs[id].setIcon(blue_N).setRotationAngle(cardinality);
+      else if (id == id_yellow)  markers_objs[id].setIcon(yellow_N).setRotationAngle(cardinality);
+      else markers_objs[id].setIcon(emergency_N);
 
+    ////set icon and angle based on id [hard and discrete (only 8 options)]
+    //   if(cardinality >= 67.5 && cardinality < 112.5) {          //90 degrees = NORTH
+    //     if (id == id_green) markers_objs[id].setIcon(green_N);
+    //     else if (id == id_red)  markers_objs[id].setIcon(red_N);
+    //     else if (id == id_blue)  markers_objs[id].setIcon(blue_N);
+    //     else if (id == id_yellow)  markers_objs[id].setIcon(yellow_N);
+    //     else markers_objs[id].setIcon(emergency_N);
+    // }
+    // else if(cardinality >= 22.5 && cardinality < 67.5) {      //45 degrees = NORTH_EAST
+    //     if (id == id_green) markers_objs[id].setIcon(green_N_E);
+    //     else if (id == id_red)  markers_objs[id].setIcon(red_N_E);
+    //     else if (id == id_blue)  markers_objs[id].setIcon(blue_N_E);
+    //     else if (id == id_yellow)  markers_objs[id].setIcon(yellow_N_E);
+    //     else markers_objs[id].setIcon(emergency_N_E);
+    // }
+    // else if(cardinality >= -22.5 && cardinality < 22.5) {     //0 degrees = EAST
+    //     if (id == id_green) markers_objs[id].setIcon(green_E);
+    //     else if (id == id_red)  markers_objs[id].setIcon(red_E);
+    //     else if (id == id_blue)  markers_objs[id].setIcon(blue_E);
+    //     else if (id == id_yellow)  markers_objs[id].setIcon(yellow_E);
+    //     else markers_objs[id].setIcon(emergency_E);
+    // }
+    // else if(cardinality >= -67.5 && cardinality < -22.5) {    //-45 degrees = SOUTH_EAST
+    //     if (id == id_green) markers_objs[id].setIcon(green_S_E);
+    //     else if (id == id_red)  markers_objs[id].setIcon(red_S_E);
+    //     else if (id == id_blue)  markers_objs[id].setIcon(blue_S_E);
+    //     else if (id == id_yellow)  markers_objs[id].setIcon(yellow_S_E);
+    //     else markers_objs[id].setIcon(emergency_S_E);
+    // }
+    // else if(cardinality >= -112.5 && cardinality < -67.5) {   //-90 degrees = SOUTH
+    //     if (id == id_green) markers_objs[id].setIcon(green_S);
+    //     else if (id == id_red)  markers_objs[id].setIcon(red_S);
+    //     else if (id == id_blue)  markers_objs[id].setIcon(blue_S);
+    //     else if (id == id_yellow)  markers_objs[id].setIcon(yellow_S);
+    //     else markers_objs[id].setIcon(emergency_S);
+    // }
+    // else if(cardinality >= -157.5 && cardinality < -112.5) {  //-135 degrees = SOUTH_WEST
+    //     if (id == id_green) markers_objs[id].setIcon(green_S_O);
+    //     else if (id == id_red)  markers_objs[id].setIcon(red_S_O);
+    //     else if (id == id_blue)  markers_objs[id].setIcon(blue_S_O);
+    //     else if (id == id_yellow)  markers_objs[id].setIcon(yellow_S_O);
+    //     else markers_objs[id].setIcon(emergency_S_O);
+    // }
+    // else if(cardinality >= 112.5 && cardinality < 157.5) {    //135 degrees = NORTH_WEST
+    //       if (id == id_green) markers_objs[id].setIcon(green_N_O);
+    //       else if (id == id_red)  markers_objs[id].setIcon(red_N_O);
+    //       else if (id == id_blue)  markers_objs[id].setIcon(blue_N_O);
+    //       else if (id == id_yellow)  markers_objs[id].setIcon(yellow_N_O);
+    //       else markers_objs[id].setIcon(emergency_N_O);
+    // }
+    // else if(cardinality >= 157.5 && cardinality <= 180
+    //     || cardinality >= -180 && cardinality <= -157.5) {    //180 degrees = WEST
+    //     if (id == id_green) markers_objs[id].setIcon(green_O);
+    //     else if (id == id_red)  markers_objs[id].setIcon(red_O);
+    //     else if (id == id_blue)  markers_objs[id].setIcon(blue_O);
+    //     else if (id == id_yellow)  markers_objs[id].setIcon(yellow_O);
+    //     else markers_objs[id].setIcon(emergency_O);
+    // }
+    
   } //end function setObjCardinality()
 
-  // Function that treats 'data' to allocate the icons in the map    [data_format = id; latitude; longitude; cardinality; distance;]
+  /// Function that treats 'data' to allocate the icons in the map    [data_format = id; latitude; longitude; cardinality; distance;]
   function updateMarker(data) {
       values = data.toString().split(";");
       id = parseInt(values[0]);
@@ -159,7 +167,7 @@
       
       if (markers_objs[id]) {
           markers_objs[id].setLatLng([lat, lng]);
-          if (id == id_emergency) {                              // id_emergency
+          if (id == id_emergency) {                           // id_emergency
               console.log("Emergency: "+ lat + "," + lng);
               markers_objs[id].setIcon(emergencyIcon);
           } else {                                            // Vehicles
@@ -202,7 +210,7 @@
 
 
 
-  // Function to calculate the absolute distance between two coordenate points
+  /// Function to calculate the absolute distance between two coordenate points
   
   // function CalcDistance(lat1, lng1, lat2, lng2, radius) { 
   //   return radius * 2 * Math.asin( Math.min(1, Math.sqrt( ( Math.pow(Math.sin( (lat2 - lat1) / 2.0), 2.0) + Math.cos(lat1) * Math.cos(lat2) * Math.pow(Math.sin((lng2 - lng1) / 2.0), 2.0) ) ) ) );
@@ -229,20 +237,20 @@
     }
   } //end function CalcDistance()
 
-  // Function to track the devices (emergency and cars)
+  /// Function to track the devices (emergency and cars)
   async function track(){
 
-      //creating a matrix 6x3 to hold the current position of the devices
-      for(var k=0; k<6; k++){
+      //creating a matrix 5x3 to hold the current position of the devices
+      for(var k=0; k<5; k++){
           current_position[k] = new Array(3);
           current_position[k][0] = k;
       }
       // console.log("matrix: " + current_position);
 
-      let vec = [{},{},{},{},{},{}];
-      let i=[0,0,0,0,0,0];  //initialize pointer of the vector vec[]
+      let vec = [{},{},{},{},{}];   //initialize 5 vectors vec[], one for each vehicle
+      let i=[0,0,0,0,0];            //initialize 5 pointers for the vectors vec[]
 
-      vec[id_emergency] = [     //vector with the coordanate points of the Emergency Vehicle (emergency) running the 'Via Vittorio Veneto' in Viareggio
+      vec[id_emergency] = [         //vector with the coordanate points of the Emergency Vehicle (emergency) running the 'Via Vittorio Veneto' in Viareggio
         {
           "lat": 45.63640444505842,
           "lon": 8.800338506698608
@@ -1951,13 +1959,13 @@
 
       var update_time = 150; // ms
 
-      // Function to treat the json with the coordenates
+      /// Function to treat the json with the coordenates
       function updateMap() {         
         setTimeout(function() {
           var angle=0, delta_x=0, delta_y=0, ddist=0;
 
-          //Loop to update vehicles from 1 to 5 [green, red, blue, yellow and emergency, respectively]
-          for(var k=1; k<6; k++){
+          //Loop to update vehicles from 4 to 0 [yellow, blue, red, green and emergency respectively]
+          for(var k=4; k>=0; k--){
               //if the vector vec[k] wasn't entirely read:
               if(i[k]<Object.keys(vec[k]).length){
 
@@ -1993,6 +2001,7 @@
                       angle = Math.atan2(delta_x,delta_y) * 180 / Math.PI;  //0 = east; 90 = north; 180 = west; -90 = south; -135 = south_west; -45 = south_east; 45 = north_east; 135 = north_west
                       ddist = CalcDistance(current_position[k][1], current_position[k][2], vec[k][i[k]].lat, vec[k][i[k]].lon, EarthRadiusInKilometers);
 //                      console.log("Vehicle["+k+"]: angle = "+angle.toFixed(2)+" degrees;  dist = "+(ddist*1000).toFixed(2)+" m;  velocity = "+((ddist/update_time)*1e6).toFixed(2)+" m/s = "+((ddist/update_time)*3.6e6).toFixed(2)+" km/h");
+                      console.log("Vehicle["+k+"]:  dx = "+delta_x+"  dy = "+delta_y+"  angle = "+angle.toFixed(2)+" degrees");
                   }
 
                   //parsing json (w/ latitude and longitude info) and building the msg to be handle in the function updateMarker()
@@ -2008,7 +2017,7 @@
                   //walk to the next position in the vector in json (w/ latitude and longitude info)
                   i[k]++;
               } //end if vec[k]
-//              console.log("vec["+k+"]: "+i[k]+" of "+Object.keys(vec[k]).length);
+//             console.log("vec["+k+"]: "+i[k]+" of "+Object.keys(vec[k]).length);
           } //end for()
           
           //if it didn't reach the end of the vector return to beggin of the function for the next iteration
@@ -2030,9 +2039,10 @@
 
       } //end function updateMap()
 
-      updateMap(); //not so sure why to call the function here again (ask Farid)
+      updateMap();
 
   } //end function track()
+
 
   
   ///Function to handle the socket
@@ -2055,8 +2065,68 @@
       xhttp.send();                                       //Sends the request to the server
   } //end function weConnect()
 
+  
 
-  ///(if I remember well... the function started with $ will be auto-called, which means that is the) Main function
+  //A function to enable rotation of a marker of leaflet map
+  (function() {
+      var proto_initIcon = L.Marker.prototype._initIcon;
+      var proto_setPos = L.Marker.prototype._setPos;
+
+      var oldIE = (L.DomUtil.TRANSFORM === 'msTransform');
+
+      L.Marker.addInitHook(function () {
+          var iconOptions = this.options.icon && this.options.icon.options;
+          var iconAnchor = iconOptions && this.options.icon.options.iconAnchor;
+          if (iconAnchor) {
+              iconAnchor = (iconAnchor[0] + 'px ' + iconAnchor[1] + 'px');
+          }
+          this.options.rotationOrigin = this.options.rotationOrigin || iconAnchor || 'center bottom' ;
+          this.options.rotationAngle = this.options.rotationAngle || 0;
+
+          this.on('drag', function(e) { e.target._applyRotation(); });
+      });
+
+      L.Marker.include({
+          _initIcon: function() {
+              proto_initIcon.call(this);
+          },
+
+          _setPos: function (pos) {
+              proto_setPos.call(this, pos);
+              this._applyRotation();
+          },
+
+          _applyRotation: function () {
+              if(this.options.rotationAngle) {
+                  this._icon.style[L.DomUtil.TRANSFORM+'Origin'] = this.options.rotationOrigin;
+
+                  if(oldIE) {
+                      // for IE 9, 2D rotation
+                      this._icon.style[L.DomUtil.TRANSFORM] = 'rotate(' + this.options.rotationAngle + 'deg)';
+                  } else {
+                      // for modern browsers, 3D accelerated version
+                      this._icon.style[L.DomUtil.TRANSFORM] += ' rotateZ(' + this.options.rotationAngle + 'deg)';
+                  }
+              }
+          },
+
+          setRotationAngle: function(angle) {
+              this.options.rotationAngle = angle;
+              this.update();
+              return this;
+          },
+
+          setRotationOrigin: function(origin) {
+              this.options.rotationOrigin = origin;
+              this.update();
+              return this;
+          }
+      });
+  })();
+
+
+
+  ///Main function [start here]
   $(function() {
     track();          //handle the positions of the devices [emergency and car]
   }); //end of $function()
