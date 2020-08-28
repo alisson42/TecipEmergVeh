@@ -50,6 +50,9 @@
   const id_yellow = 4;
 
   var current_position = [];
+
+  var f_servready = 0;
+  var serv_info = "distance ; direction ; tot_distance"
 /*----end global variabels----*/
 
 
@@ -1876,15 +1879,16 @@
                       url_rb = vec[id_emergency][i[id_emergency]].lat + "," + vec[id_emergency][i[id_emergency]].lon;
                       url_rl = "?steps=true";
                       url_rq = url_ri + url_ra + url_rb + url_rl;
-/*
-                      serv_info = wsConnect(url_rq);            //format:  serv_info = "distance ; direction ; tot_distance"
+
+                      f_servready = 1;              //flag indicating to wait the server return before continue
+                      wsConnect(url_rq);            //format:  serv_info = "distance ; direction ; tot_distance"
+                      while(f_servready == 0);      //waiting the flag signalize that the server already answered
                       //--must wait wsConnect() before continue--//
                       console.log("serv_info: " + serv_info);
                       values = serv_info.toString().split(";");
                       serv_distance = parseFloat(values[0]);
                       serv_direction = parseFloat(values[1]);
                       serv_totdistance = parseFloat(values[2]);
-*/
                   }
 
                   //evaluating difference between next and last position (angle and instantaneous velocity)
@@ -1943,13 +1947,14 @@
 //          console.log("distance: "+ data.routes[0].legs[0].steps[0].distance);
 //          console.log("direction: "+ data.routes[0].legs[0].steps[1].maneuver.modifier);
 //          console.log("tot_distance: "+ data.routes[0].legs[0].distance); 
-          info = data.routes[0].legs[0].steps[0].distance + ";" + data.routes[0].legs[0].steps[1].maneuver.modifier + ";" + data.routes[0].legs[0].distance;
-//          console.log("info: " + info);                   //"distance ; direction ; tot_distance"
-          return info;
+          serv_info = data.routes[0].legs[0].steps[0].distance + ";" + data.routes[0].legs[0].steps[1].maneuver.modifier + ";" + data.routes[0].legs[0].distance;
+//          console.log("info: " + serv_info);              //"distance ; direction ; tot_distance"
+          f_servready = 0;                                //signalize that the server answered
         }
       };
       xhttp.open("GET", url_rq, true);                    //method, url, async
       xhttp.send();                                       //Sends the request to the server
+      while(f_servready == 0);
   } //end function weConnect()
 
   
