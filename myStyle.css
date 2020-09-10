@@ -19,3 +19,8 @@ html, body {
 	padding: 0px;
 	margin: 0px;
 }
+
+#VRU, #Car1, #Car2, #Car3, #Car4 {
+	font-family: "Courier New", Courier, monospace;
+	color: black;
+}
